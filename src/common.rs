@@ -10,6 +10,8 @@ pub fn cos<T:Real>(x:T)->T { x.cos() }
 pub fn atan<T:Real>(x:T)->T { x.atan() }
 pub fn atan2<T:Real>(y:T,x:T)->T { y.atan2(x) }
 pub fn abs<T:Real>(x:T)->T { x.abs() }
+pub fn floor<T:Real>(x:T)->T { x.floor() }
+pub fn round<T:Real>(x:T)->T { x.round() }
 
 pub const PI:R = std::f64::consts::PI;
 pub const DEGREE:R = PI/180.0;
