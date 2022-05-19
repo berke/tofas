@@ -1,0 +1,12 @@
+[package]
+name = "tofas"
+version = "0.1.0"
+edition = "2021"
+authors = ["Berke DURAK <bd@exhrd.fr>"]
+licence-file = "LICENSE.txt"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num = { version = "0.4.0" }
+custom_error = { version = "1.9.2" }
