@@ -9,6 +9,9 @@ pub fn sqrt<T:Real>(x:T)->T { x.sqrt() }
 pub fn sq<T:Real>(x:T)->T { x*x }
 pub fn sin<T:Real>(x:T)->T { x.sin() }
 pub fn cos<T:Real>(x:T)->T { x.cos() }
+pub fn tan<T:Real>(x:T)->T { x.tan() }
+pub fn acos<T:Real>(x:T)->T { x.acos() }
+pub fn asin<T:Real>(x:T)->T { x.asin() }
 pub fn atan<T:Real>(x:T)->T { x.atan() }
 pub fn atan2<T:Real>(y:T,x:T)->T { y.atan2(x) }
 pub fn abs<T:Real>(x:T)->T { x.abs() }
@@ -20,8 +23,8 @@ pub const DEGREE : R = PI/180.0;
 pub const EPSILON : R = R::EPSILON;
 
 pub const TWO_PI : R = 6.283185307179586476925287;
-pub const DAS2R : R = 4.848136811095359935899141e-6;
-pub const DMAS2R : R = DAS2R / 1e3;
+pub const AS2R : R = 4.848136811095359935899141e-6;
+pub const MAS2R : R = AS2R / 1e3;
 pub const TURNAS : R = 1296000.0;
 
 pub fn anp(a:R)->R {
@@ -34,10 +37,14 @@ pub fn anp(a:R)->R {
 }
 
 pub trait Vector {
+    fn norm(self)->R;
+    fn normalize(self)->Self;
     fn scale(self,c:R)->Self;
     fn add(self,b:Self)->Self;
     fn sub(self,b:Self)->Self;
     fn neg(self)->Self;
+    fn dot(self,b:Self)->R;
+    fn angle(self,b:Self)->R;
 }
 
 impl Vector for Vec3 {
@@ -63,6 +70,22 @@ impl Vector for Vec3 {
 	[self[0] - b[0],
 	 self[1] - b[1],
 	 self[2] - b[2]]
+    }
+
+    fn norm(self)->R {
+	sqrt(sq(self[0]) + sq(self[1]) + sq(self[2]))
+    }
+
+    fn normalize(self)->Self {
+	self.scale(1.0 / self.norm())
+    }
+
+    fn dot(self,b:Self)->R {
+	self[0]*b[0] + self[1]*b[1] + self[2]*b[2]
+    }
+
+    fn angle(self,b:Self)->R {
+	acos(self.normalize().dot(b.normalize()))
     }
 }
 

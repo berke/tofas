@@ -18,3 +18,5 @@ test_data.rs: test_sofa
 test_sofa: test_sofa.f90 $(SOFA_SOURCES)
 	gfortran -Wall test_sofa.f90 $(SOFA_SOURCES) -o test_sofa
 
+test_sun: test_sun.f90 $(SOFA_SOURCES)
+	gfortran -Wall test_sun.f90 $(SOFA_SOURCES) -o test_sun

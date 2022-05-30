@@ -28,6 +28,15 @@ pub struct Geodetic {
     pub height:R
 }
 
+impl Geodetic {
+    pub fn zenith(&self)->Vec3 {
+	[cos(self.phi)*cos(self.elong),
+	 cos(self.phi)*sin(self.elong),
+	 sin(self.phi)
+	]
+    }
+}
+
 custom_error!{pub EllipsoidError
 	      InvalidRadius        = "invalid radius",
 	      InvalidFlattening    = "invalid flattening value",

@@ -85,8 +85,8 @@ impl PrecessionNutation {
     }
 }
 
-const DPPLAN : R = - 0.135 * DMAS2R;
-const DEPLAN : R =   0.388 * DMAS2R;
+const DPPLAN : R = - 0.135 * MAS2R;
+const DEPLAN : R =   0.388 * MAS2R;
 
 const NALS : &[[i8;5]] = &[
     [ 0,    0,    0,    0,    1],
@@ -249,16 +249,16 @@ const CLS : &[[R;6]] = &[
 ];
 
 const NLS : usize = 77;
-const U2R : R = DAS2R/1e7;
+const U2R : R = AS2R/1e7;
 
 /// Source: nut00b.for
 pub fn nutation(TT((date1,date2)):TT)->(R,R) {
     let t = (( date1 - DJ00 ) + date2) / DJC;
-    let el = ((485868.249036 + 1717915923.2178 * t) % TURNAS) * DAS2R;
-    let elp = ((1287104.79305 + 129596581.0481 * t) % TURNAS) * DAS2R;
-    let f   = ((335779.526232 + 1739527262.8478 * t) % TURNAS) * DAS2R;
-    let d   = ((1072260.70369 + 1602961601.2090 * t) % TURNAS) * DAS2R;
-    let om  = ((450160.398036 - 6962890.5431 * t) % TURNAS) * DAS2R;
+    let el = ((485868.249036 + 1717915923.2178 * t) % TURNAS) * AS2R;
+    let elp = ((1287104.79305 + 129596581.0481 * t) % TURNAS) * AS2R;
+    let f   = ((335779.526232 + 1739527262.8478 * t) % TURNAS) * AS2R;
+    let d   = ((1072260.70369 + 1602961601.2090 * t) % TURNAS) * AS2R;
+    let om  = ((450160.398036 - 6962890.5431 * t) % TURNAS) * AS2R;
 
     let mut dp = 0.0;
     let mut de = 0.0;
@@ -291,8 +291,8 @@ pub fn nutation(TT((date1,date2)):TT)->(R,R) {
 
 /// Source: pr00.for
 pub fn precession_rate(TT((date1,date2)):TT)->(R,R) {
-    const PRECOR : R = -0.29965 * DAS2R;
-    const OBLCOR : R = -0.02524 * DAS2R;
+    const PRECOR : R = -0.29965 * AS2R;
+    const OBLCOR : R = -0.02524 * AS2R;
     let t = ( ( date1 - DJ00 ) + date2 ) / DJC;
     let dpsipr = PRECOR * t;
     let depspr = OBLCOR * t;
@@ -302,7 +302,7 @@ pub fn precession_rate(TT((date1,date2)):TT)->(R,R) {
 /// Source: obl80.for
 pub fn mean_obliquity(TT((date1,date2)):TT)->R {
     let t = ( ( date1 - DJ00 ) + date2 ) / DJC;
-    DAS2R * ( 84381.448 +
+    AS2R * ( 84381.448 +
               ( -46.8150 +
 		 ( -0.00059 +
                     0.001813 * t ) * t ) * t )
@@ -314,11 +314,11 @@ pub fn bias_and_precession(tt@TT((date1,date2)):TT)->(Mat3,Mat3,Mat3) {
     let t = ( ( date1 - DJ00 ) + date2 ) / DJC;
     let (dpsibi,depsbi,dra0) = frame_bias();
 
-    const EPS0 : R = 84381.448 * DAS2R;
+    const EPS0 : R = 84381.448 * AS2R;
 
-    let psia77 = ( 5038.7784 + ( -1.07259 + ( -0.001147 ) * t ) * t ) * t * DAS2R;
-    let oma77 = EPS0 + (( 0.05127 + ( -0.007726 ) * t ) * t ) * t * DAS2R;
-    let chia = ( 10.5526 + ( -2.38064 + ( -0.001125 ) * t ) * t ) * t * DAS2R;
+    let psia77 = ( 5038.7784 + ( -1.07259 + ( -0.001147 ) * t ) * t ) * t * AS2R;
+    let oma77 = EPS0 + (( 0.05127 + ( -0.007726 ) * t ) * t ) * t * AS2R;
+    let chia = ( 10.5526 + ( -2.38064 + ( -0.001125 ) * t ) * t ) * t * AS2R;
 
     let (dpsipr,depspr) = precession_rate(tt); // pr00
 
@@ -345,9 +345,9 @@ pub fn bias_and_precession(tt@TT((date1,date2)):TT)->(Mat3,Mat3,Mat3) {
 
 /// Source: bi00.for
 pub fn frame_bias()->(R,R,R) {
-    const DPBIAS : R = -0.041775 * DAS2R;
-    const DEBIAS : R = -0.0068192 * DAS2R;
-    const DRA0 : R = -0.0146 * DAS2R;
+    const DPBIAS : R = -0.041775 * AS2R;
+    const DEBIAS : R = -0.0068192 * AS2R;
+    const DRA0 : R = -0.0146 * AS2R;
     (DPBIAS,DEBIAS,DRA0)
 }
 

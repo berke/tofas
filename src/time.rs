@@ -27,7 +27,7 @@ impl TT {
     /// Universal Time, UT1, to Terrestrial Time, TT
     ///
     /// Source: ut1tt.for
-    fn from_ut1(UT1((ut11,ut12)):UT1,dt:R)->Self {
+    pub fn from_ut1(UT1((ut11,ut12)):UT1,dt:R)->Self {
 	let dtd = dt/D2S;
 	let (tt1,tt2) =
 	    if ut11 > ut12 {
@@ -36,6 +36,11 @@ impl TT {
 		(ut11 + dtd,ut12)
 	    };
 	Self((tt1,tt2))
+    }
+
+    pub fn total(self)->R {
+	let TT((tt1,tt2)) = self;
+	tt1 + tt2
     }
 }
 
@@ -86,5 +91,10 @@ impl UT1 {
 		(tt1 - dtd,tt2)
 	    };
 	Self((ut11,ut12))
+    }
+
+    pub fn total(self)->R {
+	let UT1((ut11,ut12)) = self;
+	ut11 + ut12
     }
 }
