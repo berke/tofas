@@ -186,3 +186,14 @@ fn test_nutation() {
 	compare_numbers("deps",deps1,deps2,EPSILON);
     }
 }
+
+#[test]
+fn test_bias_and_precession() {
+    let tol = 1e-6;
+    for &(date1,date2,[rb1,rp1,rbp1]) in BP00_DATA {
+	let (rb2,rp2,rbp2) = frames::bias_and_precession(TT((date1,date2)));
+	compare_matrices("RB",&rb1,&rb2,tol);
+	compare_matrices("RP",&rp1,&rp2,tol);
+	compare_matrices("RBP",&rbp1,&rbp2,tol);
+    }
+}

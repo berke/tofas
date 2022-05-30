@@ -36,6 +36,43 @@ contains
     end do
     write (*,*) "];";
   end subroutine test_nutation
+
+  subroutine write_mat(a)
+    double precision, intent(in) :: a(:,:)
+    integer :: i,j
+    write (*,*) "["
+    do i=1,size(a,1)
+       write (*,"('[')",advance='no')
+       do j=1,size(a,2)
+          if (j > 1) write (*,"(',')",advance='no')
+          write (*,"(E15.8)",advance='no') a(i,j)
+       end do
+       write (*,"('],')",advance='no')
+    end do
+    write (*,*) "]"
+  end subroutine write_mat
+
+  subroutine test_bias_and_precession
+    double precision :: date1,date2
+    double precision :: rb(3,3),rp(3,3),rbp(3,3)
+    integer, parameter :: nstep = 10
+    integer :: istep
+    write (*,*) "pub const BP00_DATA : &[(R,R,[[[R;3];3];3])] = &[";
+    do istep=1,nstep
+       date1 = DJ00
+       call random_number(date2)
+       date2 = date2*DJC
+       call iau_BP00(date1,date2,rb,rp,rbp)
+       write (*,*) "(",date1,",",date2,",["
+       call write_mat(rb)
+       write (*,*) ","
+       call write_mat(rp)
+       write (*,*) ","
+       call write_mat(rbp)
+       write (*,*) "]),"
+    end do
+    write (*,*) "];";
+  end subroutine test_bias_and_precession
 end module test_sofa_m
 
 program test_sofa
@@ -45,4 +82,5 @@ program test_sofa
   write (*,*) "use crate::common::*;";
   call test_pom
   call test_nutation
+  call test_bias_and_precession
 end program test_sofa
