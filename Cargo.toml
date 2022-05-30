@@ -3,7 +3,7 @@ name = "tofas"
 version = "0.1.0"
 edition = "2021"
 authors = ["Berke DURAK <bd@exhrd.fr>"]
-licence-file = "LICENSE.txt"
+license-file = "LICENSE.txt"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
