@@ -45,13 +45,13 @@ const NS0 : [usize;3] = [NS0X, NS0Y, NS0Z];
 const NS1 : [usize;3] = [NS1X, NS1Y, NS1Z];
 const NS2 : [usize;3] = [NS2X, NS2Y, NS2Z];
 
-pub type PositionVelocity = [[f64;3];2];
+pub type PositionVelocity = [[f64;2];3];
 
 #[derive(Debug,Clone)]
 pub struct EarthPositionAndVelocity {
-    heliocentric:PositionVelocity,
-    barycentric:PositionVelocity,
-    warning:Option<EarthPositionAndVelocityWarning>
+    pub heliocentric:PositionVelocity,
+    pub barycentric:PositionVelocity,
+    pub warning:Option<EarthPositionAndVelocityWarning>
 }
 
 #[derive(Debug,Clone)]
@@ -62,7 +62,6 @@ pub enum EarthPositionAndVelocityWarning {
 impl EarthPositionAndVelocity {
     /// Earth position and velocity, heliocentric and barycentric, with
     /// respect to the Barycentric Celestial Reference System.
-    ///
     ///
     /// The date should be in the 1900-2100 AD range
     ///
@@ -166,8 +165,8 @@ impl EarthPositionAndVelocity {
 	let mut y;
 	let mut z;
 
-	let mut pvh = [[0.0;3];2];
-	let mut pvb = [[0.0;3];2];
+	let mut pvh = [[0.0;2];3];
+	let mut pvb = [[0.0;2];3];
 
 	x = ph[0];
 	y = ph[1];
