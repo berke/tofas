@@ -328,7 +328,7 @@ pub fn bias_and_precession(tt@TT((date1,date2)):TT)->(Mat3,Mat3,Mat3) {
     let rb = 
 	Mat3::identity()
 	.compose(&Mat3::rotation(0,-depsbi))
-	.compose(&Mat3::rotation(1,-dpsibi*sin(EPS0)))
+	.compose(&Mat3::rotation(1,dpsibi*sin(EPS0)))
 	.compose(&Mat3::rotation(2,dra0));
 
     let rp =
@@ -406,5 +406,5 @@ pub fn cio_locator(_tt:TT,_x:R,_y:R)->R {
 
 /// Source: c2tcio.for
 pub fn celestial_to_terrestrial_from_cio_components(rc2i:&Mat3,era:R,rpom:&Mat3)->Mat3 {
-    rpom.compose(&rc2i.compose(&Mat3::rotation(2,era)))
+    rpom.compose(&Mat3::rotation(2,era).compose(&rc2i))
 }

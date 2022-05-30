@@ -121,12 +121,26 @@ impl Matrix for Mat3 {
 	c
     }
 
+    // RX : [ 1  0  0
+    //        0  C  S  
+    //        0 -S  C ]
+    // X : 0 -> (1,2)
+
+    // RY : [ C  0  -S
+    //        0  1  0  
+    //        S  0  C ]
+    // Y : 1 -> (2,0)
+
+    // RZ : [ C  S  0
+    //       -S  C  0  
+    //        0  0  1 ]
+    // Z : 2 -> (0,1)
     fn rotation(axis:usize,theta:R)->Self {
 	let c = cos(theta);
 	let s = sin(theta);
 	let i0 = (axis + 1) % 3;
 	let i1 = (axis + 2) % 3;
-	let mut r = Self::zero();;
+	let mut r = Self::zero();
 	r[i0][i0] = c;
 	r[i0][i1] = s;
 	r[i1][i0] = -s;

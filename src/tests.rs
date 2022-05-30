@@ -76,7 +76,6 @@ fn test_earth() {
     let xp = 0.0;
     let yp = 0.0;
     let dj0 = DJ00;
-    let dj1 = dj0 + 36525.0;
     let dtr = 0.0; // XXX
     let dt = 0.0; // XXX
 
@@ -90,7 +89,7 @@ fn test_earth() {
 	    let ut1 = UT1::from_tt(tt,dt);
 	    let epv : EarthPosVel = tdb.into();
 	    assert!(epv.warning.is_none());
-	    let a = earth::rotation_angle(ut1);
+	    // let a = earth::rotation_angle(ut1);
 	    // println!("{:?} {:?} {}",epv.heliocentric,epv.barycentric,a);
 	    let c2t = frames::celestial_to_terrestrial(tt,ut1,xp,yp);
 	    // println!("Barycentric coordinates of Earth: {:?}",epv.barycentric.p);
@@ -130,7 +129,7 @@ fn compare_numbers(name:&str,a:R,b:R,tol:R) {
 }
 
 #[test]
-fn test_pom() {
+fn test_polar_motion_matrix() {
     let tol = EPSILON;
     for &(xp,yp,sp,rpom1) in POM00_DATA {
 	let rpom2 = earth::polar_motion_matrix(xp,yp,sp);
@@ -159,22 +158,10 @@ fn test_rotation() {
 }
 
 #[test]
-fn test_c2t() {
-    let xp = 0.0;
-    let yp = 0.0;
-    let dj0 = DJ00;
-    let dj1 = dj0 + 36525.0;
-    let dtr = 0.0; // XXX
-    let dt = 0.0; // XXX
-    for _iter in 0..100 {
-	// TDB dates
-	let tt1 = dj0;
-	let tt2 = (dj1-dj0)*fastrand::f64();
-	let tt = TT((tt1,tt2));
-	let tdb = TDB::from_tt(tt,dtr);
-	let ut1 = UT1::from_tt(tt,dt);
-	let c2t = frames::celestial_to_terrestrial(tt,ut1,xp,yp);
-	println!("{:?}",c2t);
+fn test_nutation_matrix() {
+    for &(epsa,dpsi,deps,rmatn1) in NUMAT_DATA {
+	let rmatn2 = frames::nutation_matrix(epsa,dpsi,deps);
+	compare_matrices("rmatn",&rmatn1,&rmatn2,EPSILON);
     }
 }
 
@@ -189,7 +176,7 @@ fn test_nutation() {
 
 #[test]
 fn test_bias_and_precession() {
-    let tol = 1e-6;
+    let tol = EPSILON;
     for &(date1,date2,[rb1,rp1,rbp1]) in BP00_DATA {
 	let (rb2,rp2,rbp2) = frames::bias_and_precession(TT((date1,date2)));
 	compare_matrices("RB",&rb1,&rb2,tol);
@@ -204,5 +191,63 @@ fn test_rotation_angle() {
     for &(ut11,ut12,era1) in ERA00_DATA {
 	let era2 = earth::rotation_angle(UT1((ut11,ut12)));
 	compare_numbers("era",era1,era2,tol);
+    }
+}
+
+#[test]
+fn test_precession_rate() {
+    let tol = EPSILON;
+    for &(tt1,tt2,dpsipr1,depspr1) in PR00_DATA {
+	let (dpsipr2,depspr2) = frames::precession_rate(TT((tt1,tt2)));
+	compare_numbers("dpsipr",dpsipr1,dpsipr2,tol);
+	compare_numbers("depspr",depspr1,depspr2,tol);
+    }
+}
+
+#[test]
+fn test_precession_nutation() {
+    let tol = 2.0*EPSILON;
+    for &(tt1,tt2,rbpn_1) in PNM00B_DATA {
+	let tt = TT((tt1,tt2));
+	let rbpn_2 = frames::precession_nutation(tt);
+	compare_matrices("RBPN",&rbpn_1,&rbpn_2,tol);
+    }
+}
+
+#[test]
+fn test_celestial_to_intermediate() {
+    let tol = EPSILON;
+    for &(tt1,tt2,rc2i_1) in C2I00B_DATA {
+	let tt = TT((tt1,tt2));
+	let rc2i_2 = frames::celestial_to_intermediate(tt);
+	compare_matrices("RC2I",&rc2i_1,&rc2i_2,tol);
+    }
+}
+
+#[test]
+fn test_celestial_to_terrestrial_from_cio_components() {
+    let tol = EPSILON;
+    for &(rc2i,era,rpom,rc2t1) in C2TCIO_DATA {
+	let rc2t2 = frames::celestial_to_terrestrial_from_cio_components(&rc2i,era,&rpom);
+	compare_matrices("RC2T",&rc2t1,&rc2t2,tol);
+    }
+}
+
+#[test]
+fn test_celestial_to_terrestrial() {
+    let tol = EPSILON;
+    let tol_mat = EPSILON;
+    let xp = 0.0;
+    let yp = 0.0;
+    for &(tt1,tt2,dtr,tdb1_1,tdb2_1,dt,ut11_1,ut12_1,rc2t_1) in C2T00B_DATA {
+	let tt = TT((tt1,tt2));
+	let TDB((tdb1_2,tdb2_2)) = TDB::from_tt(tt,dtr);
+	let ut1_2 @ UT1((ut11_2,ut12_2)) = UT1::from_tt(tt,dt);
+	compare_numbers("tdb1",tdb1_1,tdb1_2,tol);
+	compare_numbers("tdb2",tdb2_1,tdb2_2,tol);
+	compare_numbers("ut11",ut11_1,ut11_2,tol);
+	compare_numbers("ut12",ut12_1,ut12_2,tol);
+	let rc2t_2 = frames::celestial_to_terrestrial(tt,ut1_2,xp,yp);
+	compare_matrices("RC2T",&rc2t_1,&rc2t_2,tol_mat);
     }
 }
