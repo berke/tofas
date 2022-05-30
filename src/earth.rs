@@ -1,10 +1,6 @@
 use crate::common::*;
-use crate::time::{TDB,UT1};
+use crate::time::{TDB,UT1,DJY,DJ00};
 use crate::epv00_data::*;
-
-const DJY : R = 365.25;
-
-pub const DJ00 : R = 2451545.0;
 
 const AM12 : R =  0.000000211284;
 const AM13 : R = -0.000000091603;

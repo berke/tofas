@@ -20,6 +20,9 @@ pub const DEGREE : R = PI/180.0;
 pub const EPSILON : R = R::EPSILON;
 
 pub const TWO_PI : R = 6.283185307179586476925287;
+pub const DAS2R : R = 4.848136811095359935899141e-6;
+pub const DMAS2R : R = DAS2R / 1e3;
+pub const TURNAS : R = 1296000.0;
 
 pub fn anp(a:R)->R {
     // Normalize angle to range [0,2π[

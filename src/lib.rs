@@ -4,6 +4,7 @@ pub mod earth;
 pub mod calendar;
 pub mod ellipsoid;
 pub mod time;
+pub mod frames;
     
 #[cfg(test)]
 mod tests;

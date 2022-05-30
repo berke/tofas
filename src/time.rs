@@ -18,7 +18,10 @@ pub struct TAI(pub (R,R));
 #[derive(Copy,Clone,Debug)]
 pub struct TDB(pub (R,R));
 
-const D2S : R = 86400.0;
+pub const D2S : R = 86400.0;
+pub const DJY : R = 365.25;
+pub const DJ00 : R = 2451545.0;
+pub const DJC : R = 36525.0;
 
 impl TT {
     /// Universal Time, UT1, to Terrestrial Time, TT
