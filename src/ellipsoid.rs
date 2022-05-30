@@ -82,7 +82,7 @@ impl EllipsoidConverter {
     /// Transform geocentric coordinates to geodetic.
     ///
     /// Based on: gc2gde.for
-    pub fn geocentric_to_geodetic(&self,xyz:&[R;3])->Geodetic {
+    pub fn geocentric_to_geodetic(&self,xyz:&Vec3)->Geodetic {
 	let &Self { a,aeps2,e2,e4t,ec2,ec,b,.. } = self;
 	let &[x,y,z] = xyz;
 	let p2 = sq(x) + sq(y);
@@ -135,7 +135,7 @@ impl EllipsoidConverter {
     /// Transform geodetic coordinates to geocentric.
     ///
     /// Based on: gd2cde.for
-    pub fn geodetic_to_geocentric(&self,gd:&Geodetic)->Result<[R;3],EllipsoidError> {
+    pub fn geodetic_to_geocentric(&self,gd:&Geodetic)->Result<Vec3,EllipsoidError> {
 	let &Self { a,f,.. } = self;
 	let &Geodetic{ elong,phi,height } = gd;
 	let sp = sin(phi);

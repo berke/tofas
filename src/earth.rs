@@ -46,21 +46,25 @@ const NS0 : [usize;3] = [NS0X, NS0Y, NS0Z];
 const NS1 : [usize;3] = [NS1X, NS1Y, NS1Z];
 const NS2 : [usize;3] = [NS2X, NS2Y, NS2Z];
 
-pub type PositionVelocity = [[R;2];3];
-
 #[derive(Debug,Clone)]
-pub struct EarthPositionAndVelocity {
-    pub heliocentric:PositionVelocity,
-    pub barycentric:PositionVelocity,
-    pub warning:Option<EarthPositionAndVelocityWarning>
+pub struct PosVel {
+    p:Vec3,
+    v:Vec3
 }
 
 #[derive(Debug,Clone)]
-pub enum EarthPositionAndVelocityWarning {
+pub struct EarthPosVel {
+    pub heliocentric:PosVel,
+    pub barycentric:PosVel,
+    pub warning:Option<EarthPosVelWarning>
+}
+
+#[derive(Debug,Clone)]
+pub enum EarthPosVelWarning {
     DateOutOfRange
 }
 
-impl From<TDB> for EarthPositionAndVelocity {
+impl From<TDB> for EarthPosVel {
     /// Earth position and velocity, heliocentric and barycentric, with
     /// respect to the Barycentric Celestial Reference System.
     ///
@@ -74,7 +78,7 @@ impl From<TDB> for EarthPositionAndVelocity {
 	    if abs(t) < 100.0 {
 		None
 	    } else {
-		Some(EarthPositionAndVelocityWarning::DateOutOfRange)
+		Some(EarthPosVelWarning::DateOutOfRange)
 	    };
 
 	let mut ph = [0.0;3];
@@ -166,37 +170,34 @@ impl From<TDB> for EarthPositionAndVelocity {
 	let mut y;
 	let mut z;
 
-	let mut pvh = [[0.0;2];3];
-	let mut pvb = [[0.0;2];3];
-
 	x = ph[0];
 	y = ph[1];
 	z = ph[2];
-	pvh[0][0] =      x + AM12*y + AM13*z;
-	pvh[1][0] = AM21*x + AM22*y + AM23*z;
-	pvh[2][0] =          AM32*y + AM33*z;
+	let ph = [     x + AM12*y + AM13*z,
+		  AM21*x + AM22*y + AM23*z,
+		  AM32*y + AM33*z];
 	x = vh[0];
 	y = vh[1];
 	z = vh[2];
-	pvh[0][1] =      x + AM12*y + AM13*z;
-	pvh[1][1] = AM21*x + AM22*y + AM23*z;
-	pvh[2][1] =          AM32*y + AM33*z;
+	let vh = [     x + AM12*y + AM13*z,
+		  AM21*x + AM22*y + AM23*z,
+		  AM32*y + AM33*z];
 	x = pb[0];
 	y = pb[1];
 	z = pb[2];
-	pvb[0][0] =      x + AM12*y + AM13*z;
-	pvb[1][0] = AM21*x + AM22*y + AM23*z;
-	pvb[2][0] =          AM32*y + AM33*z;
+	let pb = [      x + AM12*y + AM13*z,
+	           AM21*x + AM22*y + AM23*z,
+	                    AM32*y + AM33*z];
 	x = vb[0];
 	y = vb[1];
 	z = vb[2];
-	pvb[0][1] =      x + AM12*y + AM13*z;
-	pvb[1][1] = AM21*x + AM22*y + AM23*z;
-	pvb[2][1] =          AM32*y + AM33*z;
+	let vb = [       x + AM12*y + AM13*z,
+	            AM21*x + AM22*y + AM23*z,
+	                     AM32*y + AM33*z];
 
-	EarthPositionAndVelocity {
-	    heliocentric:pvh,
-	    barycentric:pvb,
+	EarthPosVel {
+	    heliocentric:PosVel{ p:ph,v:vh },
+	    barycentric:PosVel{ p:pb,v:vb },
 	    warning
 	}
     }
@@ -205,11 +206,22 @@ impl From<TDB> for EarthPositionAndVelocity {
 /// Earth rotation angle (IAU 2000 model)
 ///
 /// Source: era00.for
-
 pub fn rotation_angle(UT1((dj1,dj2)):UT1)->R {
     let (d1,d2) = if dj1 < dj2 { (dj1,dj2) } else { (dj2,dj1) };
     let t = d1 + ( d2 - DJ00 );
     let f = (d1 % 1.0) + (d2 % 1.0);
     
     anp(TWO_PI * ( f + 0.7790572732640 + 0.00273781191135448 * t))
+}
+
+/// Form the matrix of polar motion for a given date, IAU 2000.
+///    XP,YP      coordinates of the pole (radians)
+///    SP         the TIO locator s' (radians)
+///
+/// Source: pom00.for
+pub fn polar_motion_matrix(xp:R,yp:R,sp:R)->Mat3 {
+    Mat3::identity()
+	.compose(&Mat3::rotation(0,-yp))
+	.compose(&Mat3::rotation(1,-xp))
+	.compose(&Mat3::rotation(2,sp))
 }

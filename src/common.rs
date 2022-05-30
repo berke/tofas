@@ -2,6 +2,8 @@ pub use num::traits::real::Real;
 pub use custom_error::custom_error;
 
 pub type R = f64;
+pub type Vec3 = [R;3];
+pub type Mat3 = [Vec3;3];
 
 pub fn sqrt<T:Real>(x:T)->T { x.sqrt() }
 pub fn sq<T:Real>(x:T)->T { x*x }
@@ -26,4 +28,63 @@ pub fn anp(a:R)->R {
 	w += TWO_PI;
     }
     w
+}
+
+pub trait Matrix {
+    type Vector;
+    fn zero()->Self;
+    fn identity()->Self;
+    fn apply(&self,x:Self::Vector)->Self::Vector;
+    fn compose(&self,b:&Self)->Self;
+    fn rotation(axis:usize,theta:R)->Self;
+}
+
+impl Matrix for Mat3 {
+    type Vector = Vec3;
+
+    fn zero()->Self {
+	[[0.0,0.0,0.0],
+	 [0.0,0.0,0.0],
+	 [0.0,0.0,0.0]]
+    }
+    
+    fn identity()->Self {
+	[[1.0,0.0,0.0],
+	 [0.0,1.0,0.0],
+	 [0.0,0.0,1.0]]
+    }
+
+    fn apply(&self,x:Vec3)->Vec3 {
+	[self[0][0]*x[0] + self[1][0]*x[1] + self[2][0]*x[2],
+	 self[0][1]*x[0] + self[1][1]*x[1] + self[2][1]*x[2],
+	 self[0][2]*x[0] + self[1][2]*x[1] + self[2][2]*x[2]]
+    }
+
+    fn compose(&self,b:&Self)->Self {
+	let mut c = Self::zero();
+	for i in 0..3 {
+	    for j in 0..3 {
+		let mut s = 0.0;
+		for k in 0..3 {
+		    s += self[i][k]*b[k][j];
+		}
+		c[i][j] = s;
+	    }
+	}
+	c
+    }
+
+    fn rotation(axis:usize,theta:R)->Self {
+	let c = cos(theta);
+	let s = sin(theta);
+	let i0 = (axis + 1) % 3;
+	let i1 = (axis + 2) % 3;
+	let mut r = Self::zero();;
+	r[i0][i0] = c;
+	r[i0][i1] = s;
+	r[i1][i0] = -s;
+	r[i1][i1] = c;
+	r[axis][axis] = 1.0;
+	r
+    }
 }

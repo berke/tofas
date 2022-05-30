@@ -1,7 +1,14 @@
+use crate::{
+    earth::{self,DJ00,EarthPosVel},
+    time::{TT,UT1,TDB},
+    ellipsoid::*,
+    calendar::*,
+    common::*,
+    test_data::*
+};
+
 #[test]
 fn test_ellipsoid() {
-    use crate::ellipsoid::*;
-    use crate::common::*;
 
     let ec = EllipsoidConverter::new(&WGS84).unwrap();
     for _ in 0..1000 {
@@ -28,9 +35,6 @@ fn test_ellipsoid() {
 
 #[test]
 fn test_calendar() {
-    use crate::calendar::*;
-    use crate::common::*;
-
     for (dj1,year,month,day,f1) in [
 	(2436116.31,1957,10,4,0.81)
     ] {
@@ -68,10 +72,6 @@ fn test_calendar() {
 
 #[test]
 fn test_earth() {
-    use crate::earth::{self,DJ00,EarthPositionAndVelocity};
-    use crate::time::{TT,UT1,TDB};
-    use crate::common::*;
-
     let dj0 = DJ00;
     let dj1 = dj0 + 36525.0;
     let dtr = 0.0; // XXX
@@ -83,7 +83,7 @@ fn test_earth() {
 	let tt = TT((tt1,tt2));
 	let tdb = TDB::from_tt(tt,dtr);
 	let ut1 = UT1::from_tt(tt,dt);
-	let epv : EarthPositionAndVelocity = tdb.into();
+	let epv : EarthPosVel = tdb.into();
 	assert!(epv.warning.is_none());
 	let a = earth::rotation_angle(ut1);
 	println!("{:?} {:?} {}",epv.heliocentric,epv.barycentric,a);
@@ -92,5 +92,49 @@ fn test_earth() {
     let a0 = earth::rotation_angle(UT1::from_tt(TT((dj0,0.0)),dt));
     let a1 = earth::rotation_angle(UT1::from_tt(TT((dj0,1.0)),dt));
     println!("Rotation rate: {} degree/day",(a1 - a0)/DEGREE);
+}
 
+fn compare_matrices(name:&str,a:&Mat3,b:&Mat3,tol:R) {
+    for i in 0..3 {
+	for j in 0..3 {
+	    let e = (a[i][j] - b[i][j]).abs();
+	    if e > tol {
+		println!("MISMATCH IN {name}");
+		println!("{:#?}",a);
+		println!("vs");
+		println!("{:#?}",b);
+		println!("At indices {i},{j} : {} vs {}, error {e:e} > {tol:e}",a[i][j],b[i][j]);
+		panic!("Mismatch in {name}");
+	    }
+	}
+    }
+}
+
+#[test]
+fn test_pom() {
+    let tol = EPSILON;
+    for &(xp,yp,sp,rpom1) in POM00_DATA {
+	let rpom2 = earth::polar_motion_matrix(xp,yp,sp);
+	compare_matrices("POM00",&rpom1,&rpom2,tol);
+    }
+}
+
+#[test]
+fn test_rotation() {
+    for _ in 0..100 {
+	let theta0 = fastrand::f64()*TWO_PI;
+	let theta1 = fastrand::f64()*TWO_PI;
+	let theta2 = fastrand::f64()*TWO_PI;
+	let rot0 = Mat3::rotation(0,theta0);
+	let rot1 = Mat3::rotation(0,theta1);
+	let rot2 = Mat3::rotation(0,theta2);
+	let a = rot0.compose(&rot1.compose(&rot2));
+	let irot0 = Mat3::rotation(0,-theta0);
+	let irot1 = Mat3::rotation(0,-theta1);
+	let irot2 = Mat3::rotation(0,-theta2);
+	let ia = irot2.compose(&irot1.compose(&irot0));
+	let id1 = a.compose(&ia);
+	let id2 = Mat3::identity();
+	compare_matrices("ROT",&id1,&id2,sqrt(EPSILON));
+    }
 }
