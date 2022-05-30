@@ -2,6 +2,9 @@ use crate::common::*;
 use crate::time::{TDB,UT1,DJY,DJ00};
 use crate::epv00_data::*;
 
+/// Astronomical unit (m, IAU 2012)
+pub const AUM : R = 149597870.7e3;
+
 const AM12 : R =  0.000000211284;
 const AM13 : R = -0.000000091603;
 const AM21 : R = -0.000000230286;
@@ -44,8 +47,8 @@ const NS2 : [usize;3] = [NS2X, NS2Y, NS2Z];
 
 #[derive(Debug,Clone)]
 pub struct PosVel {
-    p:Vec3,
-    v:Vec3
+    pub p:Vec3,
+    pub v:Vec3
 }
 
 #[derive(Debug,Clone)]

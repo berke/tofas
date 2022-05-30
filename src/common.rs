@@ -33,12 +33,46 @@ pub fn anp(a:R)->R {
     w
 }
 
+pub trait Vector {
+    fn scale(self,c:R)->Self;
+    fn add(self,b:Self)->Self;
+    fn sub(self,b:Self)->Self;
+    fn neg(self)->Self;
+}
+
+impl Vector for Vec3 {
+    fn neg(self)->Self {
+	[-self[0],
+	 -self[1],
+	 -self[2]]
+    }
+
+    fn scale(self,c:R)->Self {
+	[c*self[0],
+	 c*self[1],
+	 c*self[2]]
+    }
+    
+    fn add(self,b:Self)->Self {
+	[self[0] + b[0],
+	 self[1] + b[1],
+	 self[2] + b[2]]
+    }
+
+    fn sub(self,b:Self)->Self {
+	[self[0] - b[0],
+	 self[1] - b[1],
+	 self[2] - b[2]]
+    }
+}
+
 pub trait Matrix {
     type Vector;
     fn zero()->Self;
     fn identity()->Self;
     fn apply(&self,x:Self::Vector)->Self::Vector;
     fn compose(&self,b:&Self)->Self;
+    fn transpose(&self)->Self;
     fn rotation(axis:usize,theta:R)->Self;
 }
 
@@ -72,6 +106,16 @@ impl Matrix for Mat3 {
 		    s += self[i][k]*b[k][j];
 		}
 		c[i][j] = s;
+	    }
+	}
+	c
+    }
+
+    fn transpose(&self)->Self {
+	let mut c = Self::zero();
+	for i in 0..3 {
+	    for j in 0..3 {
+		c[i][j] = self[j][i];
 	    }
 	}
 	c

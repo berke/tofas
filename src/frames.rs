@@ -1,60 +1,19 @@
-//fn celestial_to_true()
+use crate::{
+    common::*,
+    time::{TT,UT1,DJ00,DJC},
+    earth
+};
 
-// Very precise version
-//
-// c2i00a
-//   pnm00a
-//     pn00a
-//       nut00a
-//         fal03
-//         faf03
-//         faom03
-//         fame03
-//         fave03
-//         fae03
-//         fama03
-//         faju03
-//         fasa03
-//         faur03
-//         fapa03
-//       pn00
-//         pr00
-//         obl80
-//         numat
-//   c2ibpn
-//     bpn2xy
-//     c2ixy
-//       c2ixys
-
-// *  2) The matrix RC2I is the first stage in the transformation from
-// *     celestial to terrestrial coordinates:
-// *
-// *        [TRS]  =  RPOM * R_3(ERA) * RC2I * [CRS]
-// *
-// *               =  RC2T * [CRS]
-// *
-// *     where [CRS] is a vector in the Geocentric Celestial Reference
-// *     System and [TRS] is a vector in the International Terrestrial
-// *     Reference System (see IERS Conventions 2003), ERA is the Earth
-// *     Rotation Angle and RPOM is the polar motion matrix.
-
-// c2i00b
-//   pnm00b
-//     pn00b
-//       nut00b
-//       pn00
-//         pr00
-//         obl80
-//         bp00
-//           bi00
-//           pr00
-//           cr
-//   c2ibpn
-//     bpn2xy
-//     c2ixy
-//       c2ixys
-use crate::common::*;
-use crate::time::{TT,DJ00,DJC};
+/// Form the celestial to terrestrial matrix given the date, the UT1
+/// and the polar motion, using the IAU 2000B nutation model.
+///
+/// Source: c2t00b.for
+pub fn celestial_to_terrestrial(tt:TT,ut1:UT1,xp:R,yp:R)->Mat3 {
+    let rc2i = celestial_to_intermediate(tt);
+    let era = earth::rotation_angle(ut1);
+    let rpom = earth::polar_motion_matrix(xp,yp,0.0);
+    celestial_to_terrestrial_from_cio_components(&rc2i,era,&rpom)
+}
 
 /// Form the celestial-to-intermediate matrix for a given date using the
 /// IAU 2000B precession-nutation model.
@@ -97,8 +56,6 @@ pub struct PrecessionNutation {
     /// GCRS-to-true matrix
     rbpn:Mat3
 }
-
-//TT((date1,date2))
 
 impl From<TT> for PrecessionNutation {
     /// Source: pn00b.for
@@ -447,7 +404,7 @@ pub fn cio_locator(_tt:TT,_x:R,_y:R)->R {
     0.0
 }
 
-// /// Source: c2ibn.for
-// pub fn celestial_to_intemediate_with_bpn(tt:TT,rbpn:Mat3)->Mat3 {
-    
-// }
+/// Source: c2tcio.for
+pub fn celestial_to_terrestrial_from_cio_components(rc2i:&Mat3,era:R,rpom:&Mat3)->Mat3 {
+    rpom.compose(&rc2i.compose(&Mat3::rotation(2,era)))
+}

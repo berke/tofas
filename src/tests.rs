@@ -1,9 +1,10 @@
 use crate::{
-    earth::{self,DJ00,EarthPosVel},
-    time::{TT,UT1,TDB},
+    common::*,
+    earth::{self,EarthPosVel},
+    time::{TT,UT1,TDB,DJ00},
     ellipsoid::*,
     calendar::*,
-    common::*,
+    frames,
     test_data::*
 };
 
@@ -72,21 +73,32 @@ fn test_calendar() {
 
 #[test]
 fn test_earth() {
+    let xp = 0.0;
+    let yp = 0.0;
     let dj0 = DJ00;
     let dj1 = dj0 + 36525.0;
     let dtr = 0.0; // XXX
     let dt = 0.0; // XXX
-    for _iter in 0..100 {
-	// TDB dates
-	let tt1 = dj0;
-	let tt2 = (dj1-dj0)*fastrand::f64();
-	let tt = TT((tt1,tt2));
-	let tdb = TDB::from_tt(tt,dtr);
-	let ut1 = UT1::from_tt(tt,dt);
-	let epv : EarthPosVel = tdb.into();
-	assert!(epv.warning.is_none());
-	let a = earth::rotation_angle(ut1);
-	println!("{:?} {:?} {}",epv.heliocentric,epv.barycentric,a);
+
+    for iday in 0..1 {
+	for ihour in 0..24 {
+	    // TDB dates
+	    let tt1 = dj0;
+	    let tt2 = iday as R + ihour as R / 24.0;
+	    let tt = TT((tt1,tt2));
+	    let tdb = TDB::from_tt(tt,dtr);
+	    let ut1 = UT1::from_tt(tt,dt);
+	    let epv : EarthPosVel = tdb.into();
+	    assert!(epv.warning.is_none());
+	    let a = earth::rotation_angle(ut1);
+	    // println!("{:?} {:?} {}",epv.heliocentric,epv.barycentric,a);
+	    let c2t = frames::celestial_to_terrestrial(tt,ut1,xp,yp);
+	    // println!("Barycentric coordinates of Earth: {:?}",epv.barycentric.p);
+	    let p = epv.barycentric.p;
+	    let sun = p.neg(); // scale(-earth::AUM);
+	    let sun_e = c2t.apply(sun);
+	    println!("{iday:3} {ihour:2} {} {} {}",sun_e[0],sun_e[1],sun_e[2]);
+	}
     }
 
     let a0 = earth::rotation_angle(UT1::from_tt(TT((dj0,0.0)),dt));
@@ -97,16 +109,23 @@ fn test_earth() {
 fn compare_matrices(name:&str,a:&Mat3,b:&Mat3,tol:R) {
     for i in 0..3 {
 	for j in 0..3 {
-	    let e = (a[i][j] - b[i][j]).abs();
+	    let e = abs(a[i][j] - b[i][j]);
 	    if e > tol {
 		println!("MISMATCH IN {name}");
 		println!("{:#?}",a);
 		println!("vs");
 		println!("{:#?}",b);
 		println!("At indices {i},{j} : {} vs {}, error {e:e} > {tol:e}",a[i][j],b[i][j]);
-		panic!("Mismatch in {name}");
+		panic!("Mismatch in {name} indices {i},{j}");
 	    }
 	}
+    }
+}
+
+fn compare_numbers(name:&str,a:R,b:R,tol:R) {
+    let e = abs(a - b);
+    if e > tol {
+	panic!("Mismatch in {name} got {a} vs {b} error {e} > {tol}")
     }
 }
 
@@ -136,5 +155,34 @@ fn test_rotation() {
 	let id1 = a.compose(&ia);
 	let id2 = Mat3::identity();
 	compare_matrices("ROT",&id1,&id2,sqrt(EPSILON));
+    }
+}
+
+#[test]
+fn test_c2t() {
+    let xp = 0.0;
+    let yp = 0.0;
+    let dj0 = DJ00;
+    let dj1 = dj0 + 36525.0;
+    let dtr = 0.0; // XXX
+    let dt = 0.0; // XXX
+    for _iter in 0..100 {
+	// TDB dates
+	let tt1 = dj0;
+	let tt2 = (dj1-dj0)*fastrand::f64();
+	let tt = TT((tt1,tt2));
+	let tdb = TDB::from_tt(tt,dtr);
+	let ut1 = UT1::from_tt(tt,dt);
+	let c2t = frames::celestial_to_terrestrial(tt,ut1,xp,yp);
+	println!("{:?}",c2t);
+    }
+}
+
+#[test]
+fn test_nutation() {
+    for &(date1,date2,dpsi1,deps1) in NUT00B_DATA {
+	let (dpsi2,deps2) = frames::nutation(TT((date1,date2)));
+	compare_numbers("dpsi",dpsi1,dpsi2,EPSILON);
+	compare_numbers("deps",deps1,deps2,EPSILON);
     }
 }
