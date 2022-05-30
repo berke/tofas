@@ -1,17 +1,18 @@
 use crate::common::*;
+use crate::time::{TDB,UT1};
 use crate::epv00_data::*;
 
-const DJY : f64 = 365.25;
+const DJY : R = 365.25;
 
-const DJ00 : f64 = 2451545.0;
+pub const DJ00 : R = 2451545.0;
 
-const AM12 : f64 =  0.000000211284;
-const AM13 : f64 = -0.000000091603;
-const AM21 : f64 = -0.000000230286;
-const AM22 : f64 =  0.917482137087;
-const AM23 : f64 = -0.397776982902;
-const AM32 : f64 =  0.397776982902;
-const AM33 : f64 =  0.917482137087;
+const AM12 : R =  0.000000211284;
+const AM13 : R = -0.000000091603;
+const AM21 : R = -0.000000230286;
+const AM22 : R =  0.917482137087;
+const AM23 : R = -0.397776982902;
+const AM32 : R =  0.397776982902;
+const AM33 : R =  0.917482137087;
 
 const NE0X : usize = 501;
 const NE0Y : usize = 501;
@@ -45,7 +46,7 @@ const NS0 : [usize;3] = [NS0X, NS0Y, NS0Z];
 const NS1 : [usize;3] = [NS1X, NS1Y, NS1Z];
 const NS2 : [usize;3] = [NS2X, NS2Y, NS2Z];
 
-pub type PositionVelocity = [[f64;2];3];
+pub type PositionVelocity = [[R;2];3];
 
 #[derive(Debug,Clone)]
 pub struct EarthPositionAndVelocity {
@@ -59,14 +60,14 @@ pub enum EarthPositionAndVelocityWarning {
     DateOutOfRange
 }
 
-impl EarthPositionAndVelocity {
+impl From<TDB> for EarthPositionAndVelocity {
     /// Earth position and velocity, heliocentric and barycentric, with
     /// respect to the Barycentric Celestial Reference System.
     ///
     /// The date should be in the 1900-2100 AD range
     ///
     /// Source: IAU SOFA epv00.for
-    pub fn at_tdb(date1:f64,date2:f64)->EarthPositionAndVelocity {
+    fn from(TDB((date1,date2)):TDB)->Self {
 	let t = ( ( date1 - DJ00 ) + date2 ) / DJY;
 	let t2 = t*t;
 	let warning =
@@ -199,4 +200,16 @@ impl EarthPositionAndVelocity {
 	    warning
 	}
     }
+}
+
+/// Earth rotation angle (IAU 2000 model)
+///
+/// Source: era00.for
+
+pub fn rotation_angle(UT1((dj1,dj2)):UT1)->R {
+    let (d1,d2) = if dj1 < dj2 { (dj1,dj2) } else { (dj2,dj1) };
+    let t = d1 + ( d2 - DJ00 );
+    let f = (d1 % 1.0) + (d2 % 1.0);
+    
+    anp(TWO_PI * ( f + 0.7790572732640 + 0.00273781191135448 * t))
 }

@@ -13,6 +13,17 @@ pub fn abs<T:Real>(x:T)->T { x.abs() }
 pub fn floor<T:Real>(x:T)->T { x.floor() }
 pub fn round<T:Real>(x:T)->T { x.round() }
 
-pub const PI:R = std::f64::consts::PI;
-pub const DEGREE:R = PI/180.0;
-pub const EPSILON:R = R::EPSILON;
+pub const PI : R = std::f64::consts::PI;
+pub const DEGREE : R = PI/180.0;
+pub const EPSILON : R = R::EPSILON;
+
+pub const TWO_PI : R = 6.283185307179586476925287;
+
+pub fn anp(a:R)->R {
+    // Normalize angle to range [0,2π[
+    let mut w = a % TWO_PI;
+    if w < 0.0 {
+	w += TWO_PI;
+    }
+    w
+}

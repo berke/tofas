@@ -68,16 +68,29 @@ fn test_calendar() {
 
 #[test]
 fn test_earth() {
-    use crate::earth::EarthPositionAndVelocity;
+    use crate::earth::{self,DJ00,EarthPositionAndVelocity};
+    use crate::time::{TT,UT1,TDB};
+    use crate::common::*;
 
-    let dj0 = 2451545.0;
+    let dj0 = DJ00;
     let dj1 = dj0 + 36525.0;
+    let dtr = 0.0; // XXX
+    let dt = 0.0; // XXX
     for _iter in 0..100 {
-	let date1 = dj0;
-	let date2 = (dj1-dj0)*fastrand::f64();
-	let epv = EarthPositionAndVelocity::at_tdb(date1,date2);
+	// TDB dates
+	let tt1 = dj0;
+	let tt2 = (dj1-dj0)*fastrand::f64();
+	let tt = TT((tt1,tt2));
+	let tdb = TDB::from_tt(tt,dtr);
+	let ut1 = UT1::from_tt(tt,dt);
+	let epv : EarthPositionAndVelocity = tdb.into();
 	assert!(epv.warning.is_none());
-	println!("{:?} {:?}",epv.heliocentric,epv.barycentric);
+	let a = earth::rotation_angle(ut1);
+	println!("{:?} {:?} {}",epv.heliocentric,epv.barycentric,a);
     }
+
+    let a0 = earth::rotation_angle(UT1::from_tt(TT((dj0,0.0)),dt));
+    let a1 = earth::rotation_angle(UT1::from_tt(TT((dj0,1.0)),dt));
+    println!("Rotation rate: {} degree/day",(a1 - a0)/DEGREE);
 
 }
