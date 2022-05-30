@@ -21,9 +21,9 @@ module epv00
       ! Therefore if size(x) = [m,n,o]
       ! the type in Rust will be
       !
-      !    x : [[[f64;o];n];m]
+      !    x : [[[R;o];n];m]
 
-      write (*,'("pub const ",A," : [[[f64;",I0,"];",I0,"];",I0,"] = [")') name,o,n,m
+      write (*,'("pub const ",A," : [[[R;",I0,"];",I0,"];",I0,"] = [")') name,o,n,m
       do i=1,m
          write (*,'("  [")')
          do j=1,n
@@ -42,5 +42,6 @@ module epv00
     end subroutine dump_array
   end module epv00
 program dump_epv00
+  write (*,'("use common::*;")')
   call iau_EPV00
 end program
