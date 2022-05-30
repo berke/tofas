@@ -197,3 +197,12 @@ fn test_bias_and_precession() {
 	compare_matrices("RBP",&rbp1,&rbp2,tol);
     }
 }
+
+#[test]
+fn test_rotation_angle() {
+    let tol = EPSILON;
+    for &(ut11,ut12,era1) in ERA00_DATA {
+	let era2 = earth::rotation_angle(UT1((ut11,ut12)));
+	compare_numbers("era",era1,era2,tol);
+    }
+}

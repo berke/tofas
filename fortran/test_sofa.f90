@@ -1,13 +1,13 @@
 module test_sofa_m
   implicit none
   double precision, parameter :: DJ00 = 2451545.0, DJC = 36525.0
+  integer, parameter :: NSTEP = 100
 contains
   subroutine test_pom
     double precision :: xp,yp,sp,rpom(3,3)
-    integer, parameter :: nstep = 10
     integer :: istep
     write (*,*) "pub const POM00_DATA : &[(R,R,R,[[R;3];3])] = &[";
-    do istep=1,nstep
+    do istep=1,NSTEP
        call random_number(xp)
        call random_number(yp)
        call random_number(sp)
@@ -24,10 +24,9 @@ contains
 
   subroutine test_nutation
     double precision :: date1,date2,dpsi,deps
-    integer, parameter :: nstep = 10
     integer :: istep
     write (*,*) "pub const NUT00B_DATA : &[(R,R,R,R)] = &[";
-    do istep=1,nstep
+    do istep=1,NSTEP
        date1 = DJ00
        call random_number(date2)
        date2 = date2*DJC
@@ -55,10 +54,9 @@ contains
   subroutine test_bias_and_precession
     double precision :: date1,date2
     double precision :: rb(3,3),rp(3,3),rbp(3,3)
-    integer, parameter :: nstep = 10
     integer :: istep
     write (*,*) "pub const BP00_DATA : &[(R,R,[[[R;3];3];3])] = &[";
-    do istep=1,nstep
+    do istep=1,NSTEP
        date1 = DJ00
        call random_number(date2)
        date2 = date2*DJC
@@ -73,6 +71,21 @@ contains
     end do
     write (*,*) "];";
   end subroutine test_bias_and_precession
+
+  subroutine test_rotation_angle
+    DOUBLE PRECISION iau_ERA00
+    double precision :: ut11,ut12,era
+    integer :: istep
+    write (*,*) "pub const ERA00_DATA : &[(R,R,R)] = &[";
+    do istep=1,NSTEP
+       ut11 = DJ00
+       call random_number(ut12)
+       ut12 = ut12*DJC
+       era = iau_ERA00(ut11,ut12)
+       write (*,*) "(",ut11,",",ut12,",",era,"),";
+    end do
+    write (*,*) "];";
+  end subroutine test_rotation_angle
 end module test_sofa_m
 
 program test_sofa
@@ -83,4 +96,5 @@ program test_sofa
   call test_pom
   call test_nutation
   call test_bias_and_precession
+  call test_rotation_angle
 end program test_sofa
