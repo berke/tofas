@@ -1,10 +1,12 @@
 use crate::common::*;
+use std::fmt::{Display,Formatter};
 
 custom_error!{pub CalendarError
 	      BadYear   = "bad year",
 	      BadMonth  = "bad month",
 	      BadDay    = "bad day",
-	      BadJulian = "bad Julian day"
+	      BadJulian = "bad Julian day",
+	      BadFract  = "bad fraction of day"
 }
 
 #[derive(Clone,Copy,Debug)]
@@ -12,6 +14,13 @@ pub struct GregorianDate {
     pub year:i32,
     pub month:i32,
     pub day:i32
+}
+
+#[derive(Clone,Copy,Debug)]
+pub struct HMS {
+    pub hour:u8,
+    pub minute:u8,
+    pub second:f64,
 }
 
 pub const MJD_ZERO : R = 2400000.5;
@@ -110,5 +119,39 @@ impl GregorianDate {
 	    month:im,
 	    day:id },
 	    fd))
+    }
+}
+
+impl Display for GregorianDate {
+    fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
+	write!(f,"{:04}-{:02}-{:02}",self.year,self.month,self.day)
+    }
+}
+
+impl HMS {
+    pub fn from_fraction_of_day(f:f64)->Result<Self,CalendarError> {
+	if f < 0.0 || f > 1.0 {
+	    return Err(CalendarError::BadFract)
+	}
+	let s = 86400.0 * f;
+	let t = (s).trunc() as u32;
+	let hour = (t / 3600) as u8;
+	let minute = ((t % 3600) / 60) as u8;
+	let second = (t % 60) as f64 + s.fract();
+	Ok(Self {
+	    hour,
+	    minute,
+	    second
+	})
+    }
+
+    pub fn to_fraction_of_day(&self)->f64 {
+	(self.second + 60.0*(self.minute as f64 + 60.0*self.hour as f64))/86400.0
+    }
+}
+
+impl Display for HMS {
+    fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
+	write!(f,"{:02}:{:02}:{:08.6}",self.hour,self.minute,self.second)
     }
 }

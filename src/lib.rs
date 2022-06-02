@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub mod common;
 pub mod earth;
 pub mod calendar;

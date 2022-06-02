@@ -46,6 +46,7 @@ fn test_calendar() {
 	let (dj2a,dj2b) = gd1.to_julian();
 	let dj2 = dj2a + dj2b + f1;
 	let e = dj1 - dj2;
+	println!("GD {gd1} -> {gd2},{f2}");
 	if e >= sqrt(EPSILON) {
 	    eprintln!("gd1 = {gd1:?}, f1 = {f1}");
 	    eprintln!("gd2 = {gd2:?}, f2 = {f2}");
@@ -253,5 +254,19 @@ fn test_celestial_to_terrestrial() {
 	compare_numbers("ut12",ut12_1,ut12_2,tol);
 	let rc2t_2 = frames::celestial_to_terrestrial(tt,ut1_2,xp,yp);
 	compare_matrices("RC2T",&rc2t_1,&rc2t_2,tol_mat);
+    }
+}
+
+#[test]
+fn test_hms() {
+    for _ in 0..1000 {
+	let f1 = fastrand::f64();
+	let hms = HMS::from_fraction_of_day(f1).unwrap();
+	assert!(hms.hour < 24);
+	assert!(hms.minute < 60);
+	assert!(0.0 <= hms.second && hms.second < 60.0);
+	let f2 = hms.to_fraction_of_day();
+	compare_numbers("FOD",f1,f2,EPSILON);
+	println!("HMS {} -> {}",f1,hms);
     }
 }
