@@ -1,3 +1,4 @@
+use std::fmt::{Display,Formatter};
 use crate::common::*;
     
 pub struct Ellipsoid {
@@ -26,6 +27,16 @@ pub struct Geodetic {
 
     /// Height above ellipsoid [m]
     pub height:R
+}
+
+impl Display for Geodetic {
+    fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
+	// +23.456789,-111.111111,+12345.67
+	write!(f,"{:+010.6},{:+011.6},{:+09.2}",
+	       anp(self.elong)*DEGREE,
+	       anp(self.phi)*DEGREE,
+	       self.height)
+    }
 }
 
 impl Geodetic {
