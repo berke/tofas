@@ -152,6 +152,6 @@ impl HMS {
 
 impl Display for HMS {
     fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
-	write!(f,"{:02}:{:02}:{:08.6}",self.hour,self.minute,self.second)
+	write!(f,"{:02}:{:02}:{:0>9.6}",self.hour,self.minute,self.second)
     }
 }
