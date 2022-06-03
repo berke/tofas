@@ -5,10 +5,9 @@ use crate::{
     ellipsoid::*,
     calendar::*,
     frames,
+    locator,
     test_data::*
 };
-
-const S00_ZERO : bool = false;
 
 #[test]
 fn test_ellipsoid() {
@@ -181,7 +180,7 @@ fn sel<T:Copy>(c:bool,x1:T,x0:T)->T { if c { x1 } else { x0 } }
 
 #[test]
 fn test_bias_and_precession() {
-    let tol = sel(S00_ZERO,EPSILON,2.0*EPSILON);
+    let tol = EPSILON;
     for &(date1,date2,[rb1,rp1,rbp1]) in BP00_DATA {
 	let (rb2,rp2,rbp2) = frames::bias_and_precession(TT((date1,date2)));
 	compare_matrices("RB",&rb1,&rb2,tol);
@@ -221,11 +220,21 @@ fn test_precession_nutation() {
 
 #[test]
 fn test_celestial_to_intermediate() {
-    let tol = sel(S00_ZERO,EPSILON,1e-6);
+    let tol = EPSILON;
     for &(tt1,tt2,rc2i_1) in C2I00B_DATA {
 	let tt = TT((tt1,tt2));
 	let rc2i_2 = frames::celestial_to_intermediate(tt);
 	compare_matrices("RC2I",&rc2i_1,&rc2i_2,tol);
+    }
+}
+
+#[test]
+fn test_locator() {
+    let tol = EPSILON;
+    for &(tt1,tt2,x,y,s001) in S00_DATA {
+	let tt = TT((tt1,tt2));
+	let s002 = locator::cio(tt,x,y);
+	compare_numbers("S00",s001,s002,tol);
     }
 }
 
@@ -241,7 +250,7 @@ fn test_celestial_to_terrestrial_from_cio_components() {
 #[test]
 fn test_celestial_to_terrestrial() {
     let tol = EPSILON;
-    let tol_mat = sel(S00_ZERO,EPSILON,1e-6);
+    let tol_mat = EPSILON;
     let xp = 0.0;
     let yp = 0.0;
     for &(tt1,tt2,dtr,tdb1_1,tdb2_1,dt,ut11_1,ut12_1,rc2t_1) in C2T00B_DATA {

@@ -6,6 +6,8 @@ pub mod calendar;
 pub mod ellipsoid;
 pub mod time;
 pub mod frames;
+pub mod locator;
+pub mod fundargs;
 
 mod epv00_data;
     

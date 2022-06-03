@@ -1,7 +1,7 @@
 # tofas
 
-This is a **partial** translation and an adaptation of selected
-subroutines from the IAU SOFA library, based on the Fortran version.
+This is a translation and an adaptation of selected subroutines from
+the IAU SOFA library, based on the Fortran version.
 
 Using pure Rust code has benefits such as better optimization, no
 compilation or linking headaches and the safety guarantees from the
@@ -14,10 +14,10 @@ are wrapped in separate types.
 The subroutines are sufficient for LEO Earth observation evaluation
 purposes, in particular for computing the Sun angles.
 
-Please note that the `cio_locator` function has not been translated
-yet and returns 0.
-
 The dependencies have been kept to a minimum.
+
+Test vectors generated using the 2017-04-20 Fortran 77 version
+of SOFA are included, as well as the F90 code to generate them.
 
 ## Author
 

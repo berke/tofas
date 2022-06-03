@@ -1,7 +1,8 @@
 use crate::{
     common::*,
     time::{TT,UT1,DJ00,DJC},
-    earth
+    earth,
+    locator
 };
 
 /// Form the celestial to terrestrial matrix given the date, the UT1
@@ -367,7 +368,7 @@ pub fn celestial_to_intermediate_with_bpn(tt:TT,rbpn:&Mat3)->Mat3 {
 
 /// Source: c2ixy.for
 pub fn celestial_to_intermediate_with_bpn_and_xy(tt:TT,x:R,y:R)->Mat3 {
-    let s00 = cio_locator(tt,x,y); // s00
+    let s00 = locator::cio(tt,x,y); // s00
     celestial_to_intermediate_from_xys(x,y,s00) // c2ixys
 }
 
@@ -390,18 +391,6 @@ pub fn celestial_to_intermediate_from_xys(x:R,y:R,s:R)->Mat3 {
 /// Source: bpn2xy.for
 pub fn xy_from_bpn(rbpn:&Mat3)->(R,R) {
     (rbpn[2][0],rbpn[2][1])
-}
-
-/// XXX: Approximation
-/// The CIO locator s is the difference between the right ascensions
-/// of the same point in two systems: the two systems are the GCRS and
-/// the CIP,CIO, and the point is the ascending node of the CIP
-/// equator.  The quantity s remains below 0.1 arcsecond throughout
-/// 1900-2100.
-///
-/// Source: s00.for
-pub fn cio_locator(_tt:TT,_x:R,_y:R)->R {
-    0.0
 }
 
 /// Source: c2tcio.for

@@ -96,9 +96,9 @@ contains
     integer :: istep
     write (*,*) "pub const BP00_DATA : &[(R,R,[[[R;3];3];3])] = &["
     do istep=1,NSTEP
-       date1 = DJ00
+       call random_number(date1)
+       date1 = date1 + DJ00
        call random_number(date2)
-       date2 = date2*DJC
        call iau_BP00(date1,date2,rb,rp,rbp)
        write (*,*) "(",date1,",",date2,",["
        call write_mat(rb)
@@ -131,9 +131,9 @@ contains
     integer :: istep
     write (*,*) "pub const PR00_DATA : &[(R,R,R,R)] = &["
     do istep=1,NSTEP
-       tt1 = DJ00
+       call random_number(tt1)
+       tt1 = DJ00 + DJC*tt1
        call random_number(tt2)
-       tt2 = tt2*DJC
        call iau_PR00(tt1,tt2,dpsipr,depspr)
        write (*,*) "(",tt1,",",tt2,",",dpsipr,",",depspr,"),"
     end do
@@ -146,9 +146,9 @@ contains
 
     write (*,*) "pub const PNM00B_DATA : &[(R,R,[[R;3];3])] = &["
     do istep=1,NSTEP
-       tt1 = DJ00
+       call random_number(tt1)
+       tt1 = DJ00 + DJC*tt1
        call random_number(tt2)
-       tt2 = tt2*DJC
        call iau_PNM00B(tt1,tt2,rbpn)
        write (*,*) "(",tt1,",",tt2,","
        call write_mat(rbpn)
@@ -156,15 +156,16 @@ contains
     end do
     write (*,*) "];"
   end subroutine test_precession_nutation
+
   subroutine test_celestial_to_intermediate
     double precision :: tt1,tt2,rc2i(3,3)
     integer :: istep
 
     write (*,*) "pub const C2I00B_DATA : &[(R,R,[[R;3];3])] = &["
     do istep=1,NSTEP
-       tt1 = DJ00
+       call random_number(tt1)
+       tt1 = DJ00 + DJC*tt1
        call random_number(tt2)
-       tt2 = tt2*DJC
        call iau_C2I00B(tt1,tt2,rc2i)
        write (*,*) "(",tt1,",",tt2,","
        call write_mat(rc2i)
@@ -172,6 +173,25 @@ contains
     end do
     write (*,*) "];"
   end subroutine test_celestial_to_intermediate
+
+  subroutine test_locator
+    double precision :: tt1,tt2,x,y,s00
+    double precision iau_S00
+    integer :: istep
+    
+    write (*,*) "pub const S00_DATA : &[(R,R,R,R,R)] = &["
+    do istep=1,NSTEP
+       call random_number(tt1)
+       tt1 = DJ00 + DJC*tt1
+       call random_number(tt2)
+       call random_number(x)
+       call random_number(y)
+       s00 = iau_S00(tt1,tt2,x,y)
+       write (*,*) "(",tt1,",",tt2,",",x,",",y,",",s00,"),"
+    end do
+    write (*,*) "];"
+  end subroutine test_locator
+
   subroutine test_celestial_to_terrestrial
     double precision :: tt1,tt2,tdb1,tdb2,ut11,ut12,xp,yp,era,rc2t(3,3)
     double precision iau_ERA00
@@ -182,9 +202,9 @@ contains
     yp = 0
     write (*,*) "pub const C2T00B_DATA : &[(R,R,R,R,R,R,R,R,[[R;3];3])] = &["
     do istep=1,NSTEP
-       tt1 = DJ00
+       call random_number(tt1)
+       tt1 = DJ00 + DJC*tt1
        call random_number(tt2)
-       tt2 = tt2*DJC
        call iau_TTTDB(tt1,tt2,dtr,tdb1,tdb2,err)
        call iau_TTUT1(tt1,tt2,dt,ut11,ut12,err)
        era = iau_ERA00(ut11,ut12)
@@ -212,5 +232,6 @@ program test_sofa
   call test_precession_nutation
   call test_celestial_to_intermediate
   call test_celestial_to_terrestrial_from_cio_components
+  call test_locator
   call test_celestial_to_terrestrial
 end program test_sofa
