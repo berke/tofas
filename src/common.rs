@@ -1,22 +1,21 @@
-pub use num::traits::real::Real;
 pub use custom_error::custom_error;
 
 pub type R = f64;
 pub type Vec3 = [R;3];
 pub type Mat3 = [Vec3;3];
 
-pub fn sqrt<T:Real>(x:T)->T { x.sqrt() }
-pub fn sq<T:Real>(x:T)->T { x*x }
-pub fn sin<T:Real>(x:T)->T { x.sin() }
-pub fn cos<T:Real>(x:T)->T { x.cos() }
-pub fn tan<T:Real>(x:T)->T { x.tan() }
-pub fn acos<T:Real>(x:T)->T { x.acos() }
-pub fn asin<T:Real>(x:T)->T { x.asin() }
-pub fn atan<T:Real>(x:T)->T { x.atan() }
-pub fn atan2<T:Real>(y:T,x:T)->T { y.atan2(x) }
-pub fn abs<T:Real>(x:T)->T { x.abs() }
-pub fn floor<T:Real>(x:T)->T { x.floor() }
-pub fn round<T:Real>(x:T)->T { x.round() }
+pub fn sqrt(x:R)->R { x.sqrt() }
+pub fn sq(x:R)->R { x*x }
+pub fn sin(x:R)->R { x.sin() }
+pub fn cos(x:R)->R { x.cos() }
+pub fn tan(x:R)->R { x.tan() }
+pub fn acos(x:R)->R { x.acos() }
+pub fn asin(x:R)->R { x.asin() }
+pub fn atan(x:R)->R { x.atan() }
+pub fn atan2(y:R,x:R)->R { y.atan2(x) }
+pub fn abs(x:R)->R { x.abs() }
+pub fn floor(x:R)->R { x.floor() }
+pub fn round(x:R)->R { x.round() }
 
 pub const PI : R = std::f64::consts::PI;
 pub const DEGREE : R = PI/180.0;

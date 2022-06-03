@@ -9,7 +9,6 @@ description = "Translation of fundamental astronomical subroutines"
 repository = "https://github.com/berke/tofas"
 
 [dependencies]
-num = { version = "0.4.0" }
 custom_error = { version = "1.9.2" }
 
 [dev-dependencies]
