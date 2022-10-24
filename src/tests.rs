@@ -1,3 +1,5 @@
+use std::fmt::Write;
+
 use crate::{
     common::*,
     earth::{self,EarthPosVel},
@@ -33,6 +35,16 @@ fn test_ellipsoid() {
 	    panic!("Conversion error");
 	}
     }
+}
+
+#[test]
+fn test_geodetic_display() {
+    let mut buf = String::new();
+    let gd = Geodetic{ elong:123.456789*DEGREE,
+		       phi:22.654321*DEGREE,
+		       height:33333.333 };
+    write!(buf,"{}",gd).unwrap();
+    assert!(buf == "+22.654321,+123.456789,+33333.33");
 }
 
 #[test]
