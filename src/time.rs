@@ -12,8 +12,8 @@ pub struct TT(pub (R,R));
 #[derive(Copy,Clone,Debug)]
 pub struct TAI(pub (R,R));
 
-// #[derive(Copy,Clone,Debug)]
-// pub struct UTC((R,R));
+#[derive(Copy,Clone,Debug)]
+pub struct UTC(pub (R,R));
 
 #[derive(Copy,Clone,Debug)]
 pub struct TDB(pub (R,R));
@@ -41,6 +41,31 @@ impl TT {
     pub fn total(self)->R {
 	let TT((tt1,tt2)) = self;
 	tt1 + tt2
+    }
+}
+
+impl UTC {
+    pub fn total(self)->R {
+	let UTC((utc1,utc2)) = self;
+	utc1 + utc2
+    }
+}
+
+impl TAI {
+    pub fn from_utc_delta_at(UTC((utc1,utc2)):UTC,dat:f64)->Self {
+	let da = dat/86400.0;
+	let (tai1,tai2) =
+	    if utc1 > utc2 {
+		(utc1,utc2 + da)
+	    } else {
+		(utc1 + da,utc2)
+	    };
+	Self((tai1,tai2))
+    }
+    
+    pub fn total(self)->R {
+	let TAI((tai1,tai2)) = self;
+	tai1 + tai2
     }
 }
 
