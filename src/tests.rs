@@ -2,6 +2,7 @@ use std::fmt::Write;
 
 use crate::{
     common::*,
+    delta_at::DeltaAt,
     earth::{self,EarthPosVel},
     time::{TT,UT1,TDB,DJ00},
     ellipsoid::*,
@@ -290,4 +291,13 @@ fn test_hms() {
 	compare_numbers("FOD",f1,f2,EPSILON);
 	println!("HMS {} -> {}",f1,hms);
     }
+}
+
+#[test]
+fn test_delta_at() {
+    let gd = GregorianDate::new(2007,4,5).unwrap();
+    let fd = 0.5;
+    let dat = gd.delta_at(fd).unwrap().unwrap();
+    let dat_exp = 33.0;
+    compare_numbers("DAT",dat,dat_exp,EPSILON);
 }

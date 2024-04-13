@@ -1,6 +1,6 @@
 [package]
 name = "tofas"
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
 authors = ["Berke DURAK <bd@exhrd.fr>"]
 license-file = "LICENSE.txt"
@@ -13,3 +13,6 @@ custom_error = { version = "1.9.2" }
 
 [dev-dependencies]
 fastrand = { version = "1.7.0" }
+
+[[example]]
+name = "sun_angle_tool"
