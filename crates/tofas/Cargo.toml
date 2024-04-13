@@ -2,6 +2,11 @@
 name = "tofas"
 edition = "2021"
 version.workspace = true
+authors.workspace = true
+license-file.workspace = true
+readme.workspace = true
+description.workspace = true
+repository.workspace = true
 
 [dependencies]
 custom_error = { workspace = true }
