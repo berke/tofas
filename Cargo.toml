@@ -1,6 +1,9 @@
-[package]
-name = "tofas"
-version = "0.2.2"
+[workspace]
+resolver = "2"
+members = ["crates/tofas","crates/tofas_extras"]
+
+[workspace.package]
+version = "0.2.3"
 edition = "2021"
 authors = ["Berke DURAK <bd@exhrd.fr>"]
 license-file = "LICENSE.txt"
@@ -8,11 +11,6 @@ readme = "README.md"
 description = "Translation of fundamental astronomical subroutines"
 repository = "https://github.com/berke/tofas"
 
-[dependencies]
+[workspace.dependencies]
 custom_error = { version = "1.9.2" }
-
-[dev-dependencies]
-fastrand = { version = "1.7.0" }
-
-[[example]]
-name = "sun_angle_tool"
+tofas = { path = "crates/tofas" }

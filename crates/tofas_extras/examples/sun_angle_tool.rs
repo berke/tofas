@@ -1,6 +1,4 @@
-mod sun_angle;
-
-use sun_angle::{
+use tofas_extras::sun_angle::{
     SunAngleParameters,
     SunAngleCalculator,
     SunAngleResultBundle

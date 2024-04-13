@@ -1,0 +1,8 @@
+[package]
+name = "tofas_extras"
+edition = "2021"
+version.workspace = true
+
+[dependencies]
+custom_error = { workspace = true }
+tofas = { workspace = true }
