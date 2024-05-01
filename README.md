@@ -19,6 +19,10 @@ The dependencies have been kept to a minimum.
 Test vectors generated using the 2017-04-20 Fortran 77 version
 of SOFA are included, as well as the F90 code to generate them.
 
+## Changes
+
+- 0.2.5: Make Ellipsoid fields public
+
 ## Author
 
 Berke DURAK <bd@exhrd.fr>

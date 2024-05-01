@@ -3,10 +3,10 @@ use crate::common::*;
     
 pub struct Ellipsoid {
     /// Equatorial radius [m]
-    a:R,
+    pub a:R,
 
     /// Flattening, around 0.00335 ~ 1/298 for Earth
-    f:R
+    pub f:R
 }
 
 /// The WGS84 reference ellipsoid.
