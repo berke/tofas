@@ -11,3 +11,5 @@ repository.workspace = true
 [dependencies]
 custom_error = { workspace = true }
 tofas = { workspace = true }
+anyhow = { version = "1" }
+pico-args = { version = "0.5" }

@@ -3,7 +3,7 @@ resolver = "2"
 members = ["crates/tofas","crates/tofas_extras"]
 
 [workspace.package]
-version = "0.2.5"
+version = "0.2.6"
 edition = "2021"
 authors = ["Berke DURAK <bd@exhrd.fr>"]
 license-file = "LICENSE.txt"
@@ -13,4 +13,4 @@ repository = "https://github.com/berke/tofas"
 
 [workspace.dependencies]
 custom_error = { version = "1.9.2" }
-tofas = { version = "0.2.5", path = "crates/tofas" }
+tofas = { version = "0.2.6", path = "crates/tofas" }

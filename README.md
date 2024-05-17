@@ -21,6 +21,7 @@ of SOFA are included, as well as the F90 code to generate them.
 
 ## Changes
 
+- 0.2.6: Add julian_tool in examples
 - 0.2.5: Make Ellipsoid fields public
 
 ## Author
