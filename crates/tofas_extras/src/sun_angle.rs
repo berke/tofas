@@ -4,37 +4,37 @@ use tofas::{
     common::*,
     time::{TT,TAI,TDB,UT1,UTC},
     frames,
-    ellipsoid::{EllipsoidConverter,Geodetic,WGS84},
+    ellipsoid::{EllipsoidConverter,Geodetic,Geodetic360,WGS84},
     earth::{self,EarthPosVel},
-    calendar::GregorianDate,
+    calendar::{GregorianDate,HMS},
     delta_at::DeltaAt,
 };
 
 #[derive(Clone,Debug)]
 pub struct SunAngleParameters {
-    pub year:i32,
-    pub month:i32,
-    pub day:i32,
-    pub hour:i32,
-    pub minute:i32,
-    pub second:i32,
-    pub lat:f64,
-    pub lon:f64,
-    pub height:f64
+    pub date:GregorianDate,
+    pub time:HMS,
+    pub position:Geodetic360
 }
 
 impl Default for SunAngleParameters {
     fn default()->Self {
 	Self {
-	    year:2007,
-	    month:4,
-	    day:5,
-	    hour:0,
-	    minute:0,
-	    second:0,
-	    height:0.0,
-	    lat:0.0,
-	    lon:-120.0
+	    date:GregorianDate {
+		year:2007,
+		month:4,
+		day:5
+	    },
+	    time:HMS {
+		hour:0,
+		minute:0,
+		second:0.0,
+	    },
+	    position:Geodetic360 {
+		height:0.0,
+		lat:0.0,
+		lon:-120.0
+	    }
 	}
     }
 }
@@ -78,21 +78,19 @@ pub struct SunAngleResult {
 impl<'a,'b> Display for SunAngleResultBundle<'a,'b> {
     fn fmt(&self,fmt:&mut std::fmt::Formatter<'_>)->Result<(),std::fmt::Error> {
 	let &SunAngleParameters {
-	    year,month,day,
-	    hour,minute,second,
-	    lat,lon,height
+	    date,
+	    time,
+	    position
 	} = self.parameters;
 	let &SunAngleResult {
 	    jd0,jd1,delta_s,p,utc,dat,tai,tt,ut1,era,earth,sun_e,sza,..
 	} = self.result;
 	let sza_d = sza / DEGREE;
-	writeln!(fmt,"Date:                {year:04}-{month:02}-{day:02}")?;
-	writeln!(fmt,"Time:                {hour:02}:{minute:02}:{second:02} \
-		      {delta_s:+13.6}s")?;
+	writeln!(fmt,"Date:                {}",date)?;
+	writeln!(fmt,"Time:                {} {:+13.6}s",time,delta_s)?;
 	writeln!(fmt,"Julian date:         {:.6} = {:.6} + {:.6}",
 		 jd0 + jd1,jd0,jd1)?;
-	writeln!(fmt,"Position:            {lat:9.4} N, {lon:9.4} E, \
-		      height {height:6.2} m")?;
+	writeln!(fmt,"Position:            {}",position)?;
 	writeln!(fmt,"                     X={:16.1} Y={:16.1} Z={:16.1}",
 		 p[0],p[1],p[2])?;
 	writeln!(fmt,"UTC:                 {:.6}",utc.total())?;
@@ -114,9 +112,9 @@ impl<'a,'b> Display for SunAngleResultBundle<'a,'b> {
 impl SunAngleCalculator {
     pub fn new(parameters:&SunAngleParameters)->Self {
 	let &SunAngleParameters {
-	    year,month,day,
-	    hour,minute,second,
-	    lat,lon,height
+	    date,
+	    time,
+	    position
 	} = parameters;
 
 	// See example 5.1 in sofa_pn_f.pdf (p.18)
@@ -128,13 +126,12 @@ impl SunAngleCalculator {
 	// UT1 - UTC
 	let dut1 = -0.072073685;
 
-	let fr = (second as f64 + 60.0*(minute as f64 + 60.0*hour as f64))/86400.0;
-	let gd = GregorianDate::new(year,month,day).expect("Invalid date");
-	let (jd0,jd1_date) = gd.to_julian();
-	let dat = gd.delta_at(fr).expect("Delta AT error").unwrap_or(0.0);
+	let fr = time.to_fraction_of_day();
+	let (jd0,jd1_date) = date.to_julian();
+	let dat = date.delta_at(fr).expect("Delta AT error").unwrap_or(0.0);
 
 	let wgs84 = EllipsoidConverter::new(&WGS84).expect("Invalid ellipsoid");
-	let p_gd = Geodetic{ elong:lon*DEGREE, phi:lat*DEGREE, height };
+	let p_gd : Geodetic = position.into();
 	let p = wgs84.geodetic_to_geocentric(&p_gd).expect("Invalid position");
 	let zen = p_gd.zenith();
 

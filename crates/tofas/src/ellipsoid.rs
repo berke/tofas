@@ -16,6 +16,50 @@ pub const WGS84 : Ellipsoid = Ellipsoid {
     f:1.0 / 298.257223563
 };
 
+#[derive(Clone,Copy,Debug,PartialEq)]
+pub struct Geodetic360 {
+    /// Longitude, degrees positive East
+    pub lon:R,
+
+    /// Latitude, degrees positive North
+    pub lat:R,
+
+    /// Height, meters above ellipsoid
+    pub height:R,
+}
+
+impl From<Geodetic360> for Geodetic {
+    fn from(gd360:Geodetic360)->Self {
+	(&gd360).into()
+    }
+}
+
+impl From<&Geodetic360> for Geodetic {
+    fn from(gd360:&Geodetic360)->Self {
+	Self {
+	    elong:gd360.lon*DEGREE,
+	    phi:gd360.lat*DEGREE,
+	    height:gd360.height
+	}
+    }
+}
+
+impl From<Geodetic> for Geodetic360 {
+    fn from(gd:Geodetic)->Self {
+	(&gd).into()
+    }
+}
+
+impl From<&Geodetic> for Geodetic360 {
+    fn from(gd:&Geodetic)->Self {
+	Self {
+	    lat:anp(gd.phi)/DEGREE,
+	    lon:anp(gd.elong)/DEGREE,
+	    height:gd.height
+	}
+    }
+}
+
 /// A point expressed in geodetic coordinates
 #[derive(Clone,Copy,Debug,PartialEq)]
 pub struct Geodetic {
@@ -31,10 +75,17 @@ pub struct Geodetic {
 
 impl Display for Geodetic {
     fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
+	Geodetic360::from(self).fmt(f)
+    }
+}
+
+
+impl Display for Geodetic360 {
+    fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
 	// +23.456789,-111.111111,+12345.67
 	write!(f,"{:+010.6},{:+011.6},{:+09.2}",
-	       anp(self.phi)/DEGREE,
-	       anp(self.elong)/DEGREE,
+	       self.lat,
+	       self.lon,
 	       self.height)
     }
 }
