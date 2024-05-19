@@ -1,43 +1,69 @@
+use anyhow::{Result,bail};
+use pico_args::Arguments;
+
 use tofas_extras::sun_angle::{
     SunAngleParameters,
     SunAngleCalculator,
     SunAngleResultBundle
 };
 
-fn main() {
-    let args : Vec<String> = std::env::args().collect();
-    let f = |i:usize| {
-	if i >= args.len() {
-	    panic!("Need at least {i} arguments");
-	}
-	&args[i]
-    };
-    let g = |i:usize| {
-	f(i).parse::<i32>().unwrap_or_else(|_| panic!("Invalid argument #{i}"))
-    };
-    let h = |i:usize| {
-	f(i).parse::<f64>().unwrap_or_else(|_| panic!("Invalid argument #{i}"))
-    };
+fn main()->Result<()> {
+    let mut args = Arguments::from_env();
+
+    let year : i32 = args.opt_value_from_str("--year")?.unwrap_or(2007);
+    let month : i32 = args.opt_value_from_str("--month")?.unwrap_or(4);
+    let day : i32 = args.opt_value_from_str("--day")?.unwrap_or(5);
+    let hour : i32 = args.opt_value_from_str("--hour")?.unwrap_or(0);
+    let minute : i32 = args.opt_value_from_str("--min")?.unwrap_or(0);
+    let second : i32 = args.opt_value_from_str("--sec")?.unwrap_or(0);
+    let lat : f64 = args.opt_value_from_str("--lat")?.unwrap_or(0.0);
+    let lon : f64 = args.opt_value_from_str("--lon")?.unwrap_or(-120.0);
+    let height : f64 = args.opt_value_from_str("--height")?.unwrap_or(0.0);
+
+    let delta0 : f64 = args.opt_value_from_str("--delta0")?.unwrap_or(-600.0);
+    let delta1 : f64 = args.opt_value_from_str("--delta1")?.unwrap_or(600.0);
+    let delta_step : f64 = args.opt_value_from_str("--delta_step")?
+	.unwrap_or(60.0);
+    let scan = args.contains("--scan");
+    if !args.finish().is_empty() {
+	bail!("Unhandled extra arguments");
+    }
+
     let parameters = SunAngleParameters {
-	year:g(1),
-	month:g(2),
-	day:g(3),
-	hour:g(4),
-	minute:g(5),
-	second:g(6),
-	lat:h(7),
-	lon:h(8),
-	height:h(9)
+	year,
+	month,
+	day,
+	hour,
+	minute,
+	second,
+	lat,
+	lon,
+	height,
     };
 
-    let mut calc = SunAngleCalculator::default();
+    let calc = SunAngleCalculator::new(&parameters);
 
-    let result = calc.compute(&parameters);
+    if scan {
+	println!("Will scan from {:+13.6}s to {:+13.6}s in steps of {:13.6}",
+		 delta0,delta1,delta_step);
+    }
 
-    let bundle = SunAngleResultBundle {
-	parameters:&parameters,
-	result:&result
-    };
+    let mut delta = delta0;
+    while delta <= delta1 {
+	if scan {
+	    println!();
+	}
+	let result = calc.compute(delta);
+	let bundle = SunAngleResultBundle {
+	    parameters:&parameters,
+	    result:&result
+	};
+	print!("{}",bundle);
+	if !scan {
+	    break;
+	}
+	delta += delta_step;
+    }
 
-    print!("{}",bundle);
+    Ok(())
 }
