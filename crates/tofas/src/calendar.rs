@@ -129,6 +129,10 @@ impl Display for GregorianDate {
 }
 
 impl HMS {
+    pub fn new(hour:u8,minute:u8,second:f64)->Self {
+	Self { hour,minute,second }
+    }
+    
     pub fn from_fraction_of_day(f:f64)->Result<Self,CalendarError> {
 	if f < 0.0 || f > 1.0 {
 	    return Err(CalendarError::BadFract)
