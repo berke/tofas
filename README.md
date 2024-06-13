@@ -19,8 +19,9 @@ The dependencies have been kept to a minimum.
 Test vectors generated using the 2017-04-20 Fortran 77 version
 of SOFA are included, as well as the F90 code to generate them.
 
-## Changes
+## Significant changes
 
+- 0.2.8: Normalize Geodetic360 angles to [-180,180[ and [-90,90[
 - 0.2.7: Reorganize Sun angle calculator
 - 0.2.6: Add julian_tool in examples
 - 0.2.5: Make Ellipsoid fields public
