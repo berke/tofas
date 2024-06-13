@@ -1,6 +1,7 @@
 use std::fmt::{Display,Formatter};
 use crate::common::*;
     
+#[derive(Clone,Copy,Debug,PartialEq)]
 pub struct Ellipsoid {
     /// Equatorial radius [m]
     pub a:R,
@@ -52,9 +53,13 @@ impl From<Geodetic> for Geodetic360 {
 
 impl From<&Geodetic> for Geodetic360 {
     fn from(gd:&Geodetic)->Self {
+	let lon = (gd.elong/DEGREE + 180.0).rem_euclid(360.0) - 180.0;
+	let lat = (gd.phi/DEGREE + 90.0).rem_euclid(180.0) - 90.0;
+	debug_assert!(-180.0 <= lon && lon <= 180.0);
+	debug_assert!(-90.0 <= lat && lat <= 90.0);
 	Self {
-	    lat:anp(gd.phi)/DEGREE,
-	    lon:anp(gd.elong)/DEGREE,
+	    lat,
+	    lon,
 	    height:gd.height
 	}
     }
@@ -107,8 +112,7 @@ custom_error!{pub EllipsoidError
 }
 
 pub struct EllipsoidConverter {
-    a:R,
-    f:R,
+    el:Ellipsoid,
     aeps2:R,
     e2:R,
     e4t:R,
@@ -139,8 +143,7 @@ impl EllipsoidConverter {
 	let ec = sqrt(ec2);
 	let b = a*ec;
 	Ok(Self{
-	    a,
-	    f,
+	    el:*ellipsoid,
 	    aeps2,
 	    e2,
 	    e4t,
@@ -150,11 +153,16 @@ impl EllipsoidConverter {
 	})
     }
 
+    /// Return the ellipsoid
+    pub fn ellipsoid(&self)->&Ellipsoid {
+	&self.el
+    }
+
     /// Transform geocentric coordinates to geodetic.
     ///
     /// Based on: gc2gde.for
     pub fn geocentric_to_geodetic(&self,xyz:&Vec3)->Geodetic {
-	let &Self { a,aeps2,e2,e4t,ec2,ec,b,.. } = self;
+	let &Self { el:Ellipsoid { a,.. },aeps2,e2,e4t,ec2,ec,b,.. } = self;
 	let &[x,y,z] = xyz;
 	let p2 = sq(x) + sq(y);
 	let elong =
@@ -205,9 +213,9 @@ impl EllipsoidConverter {
 
     /// Transform geodetic coordinates to geocentric.
     ///
-    /// Based on: gd2cde.for
+    /// Based on: gd2gce.for
     pub fn geodetic_to_geocentric(&self,gd:&Geodetic)->Result<Vec3,EllipsoidError> {
-	let &Self { a,f,.. } = self;
+	let &Self { el:Ellipsoid { a,f,.. },.. } = self;
 	let &Geodetic{ elong,phi,height } = gd;
 	let sp = sin(phi);
 	let cp = cos(phi);
