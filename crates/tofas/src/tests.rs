@@ -50,20 +50,61 @@ fn test_geodetic_display() {
 
 #[test]
 fn test_calendar() {
+    let tol = sqrt(EPSILON);
+
     for (dj1,year,month,day,f1) in [
-	(2436116.31,1957,10,4,0.81)
+	(2436116.31       ,1957,10, 4, 0.81),
     ] {
 	let gd1 = GregorianDate::new(year,month,day).unwrap();
 	let (gd2,f2) = GregorianDate::from_julian(dj1,0.0).unwrap();
 	let (dj2a,dj2b) = gd1.to_julian();
 	let dj2 = dj2a + dj2b + f1;
-	let e = dj1 - dj2;
+	let e = abs(dj1 - dj2);
 	println!("GD {gd1} -> {gd2},{f2}");
-	if e >= sqrt(EPSILON) {
+	if e >= tol {
 	    eprintln!("gd1 = {gd1:?}, f1 = {f1}");
 	    eprintln!("gd2 = {gd2:?}, f2 = {f2}");
 	    eprintln!("dj2 = {dj2} = {dj2a} + {dj2b}, e = {e}");
-	    panic!("Known conversion failed");
+	    panic!("Known conversion failed (1)");
+	}
+    }
+
+    for (jd0,year,month,day,hour,minute,second) in [
+	(2460623.50       ,2024,11, 9, 0,0,0.0),
+	(2433282.623611111,1950, 1, 1, 2,58,0.0)
+    ] {
+	let gd1 = GregorianDate::new(year,month,day).unwrap();
+	let hms1 = HMS::new(hour,minute,second);
+	let fd1 = hms1.to_fraction_of_day();
+	let (jd1,jd2) = gd1.to_julian();
+	let jd = jd1 + jd2 + fd1;
+	let e = abs(jd - jd0);
+	println!("{jd} {jd0} {e}");
+	if e >= tol {
+	    eprintln!("gd1 = {gd1:?}");
+	    eprintln!("hms1 = {hms1:?}");
+	    eprintln!("fd1 = {fd1}");
+	    eprintln!("jd1 = {jd1}");
+	    eprintln!("jd2 = {jd2}");
+	    eprintln!("jd = {jd}");
+	    eprintln!("e = {e}");
+	    panic!("Known conversion failed (2)");
+	}
+
+	let (gd2,fd2) = GregorianDate::from_julian(jd1,jd2 + fd1).unwrap();
+	let hms2 = HMS::from_fraction_of_day(fd2).unwrap();
+	if gd1 != gd2 {
+	    eprintln!("gd1 = {gd1:?}");
+	    eprintln!("gd2 = {gd2:?}");
+	    panic!("Known conversion failed (3)");
+	}
+	if hms1.hour != hms2.hour || hms1.minute != hms2.minute
+	    || (hms1.second - hms2.second).abs() >= 100.0*tol
+	{
+	    eprintln!("hms1 = {hms1:?}");
+	    eprintln!("hms2 = {hms2:?}");
+	    println!("tol = {tol:e}");
+	    panic!("Known conversion failed (4)");
 	}
     }
 
@@ -75,7 +116,7 @@ fn test_calendar() {
 	let (dj2a,dj2b) = gd.to_julian();
 	let dj2 = dj2a + dj2b + f2;
 	let e = abs(dj1 - dj2);
-	if e >= sqrt(EPSILON) {
+	if e >= tol {
 	    eprintln!("Iteration {iter}");
 	    eprintln!("dj1 = {dj1}");
 	    eprintln!("gd = {gd:?}");

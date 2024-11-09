@@ -9,7 +9,7 @@ custom_error!{pub CalendarError
 	      BadFract  = "bad fraction of day"
 }
 
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone,Copy,Debug,PartialEq)]
 pub struct GregorianDate {
     pub year:i32,
     pub month:i32,
