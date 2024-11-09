@@ -21,6 +21,7 @@ of SOFA are included, as well as the F90 code to generate them.
 
 ## Significant changes
 
+- 0.2.9: Add HMS arguments to julian_tool, add calendar tests
 - 0.2.8: Normalize Geodetic360 angles to [-180,180[ and [-90,90[
 - 0.2.7: Reorganize Sun angle calculator
 - 0.2.6: Add julian_tool in examples
