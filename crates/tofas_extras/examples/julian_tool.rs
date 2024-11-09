@@ -7,10 +7,17 @@ fn gregorian(mut args:Arguments)->Result<()> {
     let year : i32 = args.value_from_str("--year")?;
     let month : i32 = args.value_from_str("--month")?;
     let day : i32 = args.value_from_str("--day")?;
+    let hour : u8 = args.opt_value_from_str("--hour")?.unwrap_or(12);
+    let minute : u8 = args.opt_value_from_str("--minute")?.unwrap_or(0);
+    let second : f64 = args.opt_value_from_str("--second")?.unwrap_or(0.0);
     let gd = GregorianDate::new(year,month,day)?;
     println!("Gregorian date: {}",gd);
+    let hms = HMS::new(hour,minute,second);
+    println!("Time: {}",hms);
+    let fd = hms.to_fraction_of_day();
     let (jd1,jd2) = gd.to_julian();
-    println!("Julian date: {:.1}",jd1 + jd2);
+    println!("Julian date: {:.6}",jd1 + jd2 + fd);
+    println!("Fraction of day: {:.6}",fd);
     Ok(())
 }
 
