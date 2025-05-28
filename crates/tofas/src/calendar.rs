@@ -166,6 +166,12 @@ impl GregorianDateHMS {
 	let hms = HMS::from_fraction_of_day(fod)?;
 	Ok(Self { date,hms })
     }
+
+    pub fn to_julian(&self)->(R,R) {
+	let (dj1,dj2) = self.date.to_julian();
+	let fod = self.hms.to_fraction_of_day();
+	(dj1,dj2 + fod)
+    }
 }
 
 impl Display for HMS {
