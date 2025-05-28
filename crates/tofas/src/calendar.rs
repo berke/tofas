@@ -23,6 +23,12 @@ pub struct HMS {
     pub second:f64,
 }
 
+#[derive(Clone,Copy,Debug)]
+pub struct GregorianDateHMS {
+    pub date:GregorianDate,
+    pub hms:HMS
+}
+
 pub const MJD_ZERO : R = 2400000.5;
 
 pub const YEAR_MIN : i32 = -4799;
@@ -154,8 +160,22 @@ impl HMS {
     }
 }
 
+impl GregorianDateHMS {
+    pub fn from_julian(dj1:R,dj2:R)->Result<GregorianDateHMS,CalendarError> {
+	let (date,fod) = GregorianDate::from_julian(dj1,dj2)?;
+	let hms = HMS::from_fraction_of_day(fod)?;
+	Ok(Self { date,hms })
+    }
+}
+
 impl Display for HMS {
     fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
 	write!(f,"{:02}:{:02}:{:0>9.6}",self.hour,self.minute,self.second)
+    }
+}
+
+impl Display for GregorianDateHMS {
+    fn fmt(&self,f:&mut Formatter<'_>)->Result<(),std::fmt::Error> {
+	write!(f,"{} {}",self.date,self.hms)
     }
 }
